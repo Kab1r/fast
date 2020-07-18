@@ -1,0 +1,14 @@
+name: Github Package Registry
+on: [push]
+
+jobs:
+  publish:
+    name: Publish Image to Package Registry
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Publish Image
+        uses: craftech-io/package-action@v3.1.0
+        with:
+          tags: latest
+          access_token: ${{ secrets.GH_PACKAGE_TOKEN }}
