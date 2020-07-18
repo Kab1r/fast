@@ -1,4 +1,4 @@
-# fast
+# fast ![Github Package Registry](https://github.com/KabirKwatra/fast/workflows/Github%20Package%20Registry/badge.svg)
 
 ![fast preview](https://s7.gifyu.com/images/fast.gif)
 
