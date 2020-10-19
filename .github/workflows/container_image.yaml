@@ -2,13 +2,26 @@ name: Github Package Registry
 on: [push]
 
 jobs:
-  publish:
-    name: Publish Image to Package Registry
+  buildx:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Setup Buildx
+        uses: crazy-max/ghaction-docker-buildx@v1
+      - name: Login to Dockerhub
+        run: echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin 2>&1
+      - name: Login to GHCR
+        run: echo ${{ GITHUB_TOKEN }} | docker login ghcr.io -u ${{ GITHUB_ACTOR }} --password-stdin 2>&1
+      - name: Build Image
+        run: |
+          docker buildx build \
+            --progress plain \
+            --platform=linux/amd64,linux/386,linux/arm64,linux/arm/v7 \
+            --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
+            --build-arg VCS_REF=`git rev-parse --short HEAD` \
+            --build-arg VERSION=latest \
+            -t kabirkwatra/fast:latest
       - name: Publish Image
-        uses: craftech-io/package-action@v3.1.0
-        with:
-          tags: latest
-          access_token: ${{ secrets.GH_PACKAGE_TOKEN }}
+        run: |
+          docker push ghcr.io/kabirkwatra/fast:latest
+          docker push docker.io/kabirkwatra/fast:latest
