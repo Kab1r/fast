@@ -8,10 +8,19 @@ jobs:
       - uses: actions/checkout@v2
       - name: Setup Buildx
         uses: crazy-max/ghaction-docker-buildx@v1
+
       - name: Login to Dockerhub
-        run: echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin 2>&1
-      - name: Login to GHCR
-        run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin 2>&1
+        uses: docker/login-actions@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ github.token }}
+      - name: Login GitHub Container Registry
+        uses: docker/login-actions@v1
+        with:
+          registry: docker.io
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
       - name: Build Image
         run: |
           docker buildx build \
