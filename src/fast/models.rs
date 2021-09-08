@@ -12,7 +12,7 @@ pub struct FastJson {
 pub struct FastClient {
     pub asn: String,
     pub ip: String,
-    pub isp: String,
+    pub isp: Option<String>,
 }
 #[derive(Deserialize)]
 /// Target to where we send packets

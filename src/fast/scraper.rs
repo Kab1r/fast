@@ -1,6 +1,8 @@
+use super::error::FastError;
 use regex::Regex;
-use reqwest::{blocking::Client, Error};
+use reqwest::Client;
 use select::{document::Document, predicate::Attr};
+use std::io::{Error as IoError, ErrorKind::NotFound};
 
 lazy_static! {
     static ref RE_ENDPOINT: Regex = Regex::new(r#"apiEndpoint="([\w|\\/|\.]*)""#).unwrap();
@@ -11,48 +13,55 @@ lazy_static! {
 const ENDPONT: &str = "https://fast.com";
 
 /// Returns the contents of the javascript file served by Fast
-pub fn get_js_file(client: &Client) -> Result<String, Error> {
-    let data = client.get(ENDPONT).send()?.text()?;
+pub async fn get_js_file(client: &Client) -> Result<String, FastError> {
+    let res = client.get(ENDPONT).send().await?;
+    let data = res.text().await?;
     let document = Document::from(data.as_str());
 
     let filename = document
         .find(Attr("src", ()))
         .into_selection()
         .first()
-        .expect("No src attribute found")
+        .ok_or(IoError::new(NotFound, "src Attribute Not Found"))?
         .attr("src")
         .unwrap();
     let javascript = client
         .get(format!("{}{}", ENDPONT, filename).as_str())
-        .send()?
-        .text()?;
+        .send()
+        .await?
+        .text()
+        .await?;
     Ok(javascript)
 }
 
 /// Parses the javascript for a given regular expression
-fn parse_javascript(javascript: &str, re: &Regex) -> String {
-    let res = re.captures(javascript).expect("Capture failed");
-    res.get(1).expect("Item missing").as_str().to_string()
+fn parse_javascript(javascript: &str, re: &Regex) -> Result<String, FastError> {
+    Ok(re
+        .captures(javascript)
+        .ok_or(IoError::new(NotFound, "No Match Found"))?
+        .get(1)
+        .ok_or(IoError::new(NotFound, "First Match Not Found"))?
+        .as_str()
+        .to_string())
 }
 
 /// Parses the javascript given and returns the api endpoint url
-pub fn get_api_endpoint(javascript: &str) -> String {
-    format!("https://{}", parse_javascript(javascript, &RE_ENDPOINT))
+pub fn get_api_endpoint(javascript: &str) -> Result<String, FastError> {
+    Ok("https://".to_string() + &parse_javascript(javascript, &RE_ENDPOINT)?)
 }
 
 /// Parses the javascript given and returns the api token
-pub fn get_token(javascript: &str) -> String {
-    parse_javascript(javascript, &RE_TOKEN)
+pub fn get_token(javascript: &str) -> Result<String, FastError> {
+    Ok(parse_javascript(javascript, &RE_TOKEN)?)
 }
 
 /// Parses the javascript given and returns number of urls
-pub fn get_url_count(javascript: &str) -> u16 {
-    let count_string = parse_javascript(javascript, &RE_COUNT);
-    count_string.parse().expect("String s-> u16 parsing failed")
+pub fn get_url_count(javascript: &str) -> Result<u16, FastError> {
+    Ok(parse_javascript(javascript, &RE_COUNT)?.parse()?)
 }
 
 /// Parses the javascript given and returns default maximum payload length
-pub fn get_max_payload_length(javascript: &str) -> usize {
-    let max_string = parse_javascript(javascript, &RE_PAYLOAD);
-    max_string.parse().expect("String -> u32 parsing failed")
+pub fn get_max_payload_length(javascript: &str) -> Result<usize, FastError> {
+    let max_string = parse_javascript(javascript, &RE_PAYLOAD)?;
+    Ok(max_string.parse()?)
 }

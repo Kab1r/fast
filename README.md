@@ -1,4 +1,5 @@
-# fast ![Github Package Registry](https://github.com/KabirKwatra/fast/workflows/Github%20Package%20Registry/badge.svg)
+# fast ![Github Package Registry](https://github.com/KabirKwatra/fast/workflows/Github%20Package%20Registry/badge.svg) [![dependency status](https://deps.rs/repo/github/kab1r/fast/status.svg)](https://deps.rs/repo/github/kab1r/fast)
+
 
 ![fast preview](https://s7.gifyu.com/images/fast.gif)
 
