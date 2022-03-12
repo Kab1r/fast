@@ -1,4 +1,4 @@
-name: OCI Image
+name: Container Image
 on:   
   push:
     branches:
@@ -9,7 +9,7 @@ on:
   pull_request:
 
 jobs:
-  oci_image:
+  container_image:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

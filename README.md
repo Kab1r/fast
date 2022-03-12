@@ -1,22 +1,22 @@
-# fast ![Github Package Registry](https://github.com/KabirKwatra/fast/workflows/Github%20Package%20Registry/badge.svg) [![dependency status](https://deps.rs/repo/github/kab1r/fast/status.svg)](https://deps.rs/repo/github/kab1r/fast)
+# fast ![Container Image](https://github.com/Kab1r/fast/workflows/Container%20Image/badge.svg) [![dependency status](https://deps.rs/repo/github/kab1r/fast/status.svg)](https://deps.rs/repo/github/kab1r/fast)
 
 
-![fast preview](https://s7.gifyu.com/images/fast.gif)
+![fast preview](./.github/assets/preview.svg)
 
 ## Installation
 
 ### Precompiled binaries
 
-* Download a binary from [Releases](https://github.com/KabirKwatra/fast/releases)
+* Download a binary from [Releases](https://github.com/Kab1r/fast/releases)
 * Change the file's permissions to be executable, `chmod +x fast`
 * Move the binary to a location in your shell path
 
 ### Install from source
 
 * Install Rust and Cargo using [rustup](https://rustup.rs/)
-* Clone this repo and `cd` into it
+* Clone this repository and `cd` into it
 * `cargo install --path .`
 
 ### Run in Docker
 
-* `docker run -it kabirkwatra/fast`
+* `docker run -it ghcr.io/Kab1r/fast`

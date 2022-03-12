@@ -1,4 +1,5 @@
 use super::error::FastError;
+use lazy_static::lazy_static;
 use regex::Regex;
 use reqwest::Client;
 use select::{document::Document, predicate::Attr};

@@ -8,9 +8,8 @@ use async_stream::stream;
 use futures_util::pin_mut;
 use futures_util::stream::StreamExt;
 use std::io::{Error as IoError, ErrorKind::NotFound};
-#[macro_use]
-extern crate lazy_static;
 
+use colored::Colorize;
 use quicli::prelude::*;
 use structopt::StructOpt;
 
@@ -31,7 +30,7 @@ async fn main() -> CliResult {
     let mut terminal = term::stdout().ok_or(IoError::new(NotFound, "stdout Not Found"))?;
     let fast = Fast::new().await?;
 
-    let spinner = Spinner::new(&Spinners::Arc, "Starting".to_string());
+    let spinner = Spinner::new(&Spinners::Arc, "Starting...".to_string());
     if args.debug {
         eprintln!("\n{:?}", fast);
     }
@@ -42,7 +41,7 @@ async fn main() -> CliResult {
 
     // A stream of string to out
     let output = stream! {
-        yield "Connecting".to_string();
+        yield "Connecting...".to_string();
 
         let speeds = Fast::measure(urls, args.count, fast.max_payload_length);
         for await kbps in speeds {
@@ -60,7 +59,7 @@ async fn main() -> CliResult {
     terminal.carriage_return()?;
     terminal.delete_line()?;
 
-    println!("✓ {}", current_message);
+    println!("{} {}", "✓".green(), current_message);
     Ok(())
 }
 
@@ -75,15 +74,16 @@ fn format_speed(kbps: f64) -> String {
     const MEGABIT: f64 = 1e6;
     const KILOBIT: f64 = 1e3;
 
-    match kbps * KILOBIT {
-        bits if bits > YOTTABIT => format!("{:.2} Ybps", bits / YOTTABIT),
-        bits if bits > ZETTABIT => format!("{:.2} Zbps", bits / ZETTABIT),
-        bits if bits > EXABIT => format!("{:.2} Ebps", bits / EXABIT),
-        bits if bits > PETABIT => format!("{:.2} Pbps", bits / PETABIT),
-        bits if bits > TERABIT => format!("{:.2} Tbps", bits / TERABIT),
-        bits if bits > GIGABIT => format!("{:.2} Gbps", bits / GIGABIT),
-        bits if bits > MEGABIT => format!("{:.2} Mbps", bits / MEGABIT),
-        bits if bits > KILOBIT => format!("{:.2} Kbps", bits / KILOBIT),
-        bits => format!("{:.2} bits/s", bits),
-    }
+    let (scale, val) = match kbps * KILOBIT {
+        bits if bits > YOTTABIT => ("Y", bits / YOTTABIT),
+        bits if bits > ZETTABIT => ("Z", bits / ZETTABIT),
+        bits if bits > EXABIT => ("E", bits / EXABIT),
+        bits if bits > PETABIT => ("P", bits / PETABIT),
+        bits if bits > TERABIT => ("T", bits / TERABIT),
+        bits if bits > GIGABIT => ("G", bits / GIGABIT),
+        bits if bits > MEGABIT => ("M", bits / MEGABIT),
+        bits if bits > KILOBIT => ("K", bits / KILOBIT),
+        bits => ("b", bits),
+    };
+    format!("{:.2} {}bps", val, scale)
 }
